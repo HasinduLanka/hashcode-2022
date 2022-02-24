@@ -70,14 +70,36 @@ func main() {
 	// console.Log(sol1)
 	console.Log(sol1.Eval())
 
+	maxScore := sol1.Eval()
+
+	for i := 0; i < len(sol1.Assignments); i++ {
+		for j := i + 1; j < len(sol1.Assignments); j++ {
+			sol2 := sol1.Clone()
+
+			a1 := sol1.Assignments[i]
+			a2 := sol1.Assignments[j]
+
+			sol2.Assignments[i] = a2
+			sol2.Assignments[j] = a1
+
+			score := sol2.Eval()
+
+			if score > maxScore {
+				maxScore = score
+				sol1 = sol2
+
+				console.Print("New max score: " + strconv.Itoa(maxScore))
+			}
+			// console.Print("Score: " + strconv.Itoa(score))
+		}
+	}
+
 }
 
 func ParseTestCase(S string) *TestCase {
 	tc := &TestCase{}
 
 	fc := console.NewReaderFromString(S)
-
-	// A := strings.Split(S, "\n")
 
 	l1 := fc.ReadArrayClean(" ")
 	C, _ := strconv.ParseInt(l1[0], 10, 32)
@@ -237,49 +259,6 @@ func (sol *Solution) Eval() int {
 			}
 		}
 
-		// for _, roleSkil := range assignment.Proj.Roles {
-		// 	for _, contr := range assignment.Contribs {
-		// 		role := roleSkil.Name
-		// 		roleLvl := roleSkil.Level
-
-		// 		sklLvl, sklFound := contr.Skills[role]
-		// 		if !sklFound {
-		// 			if roleLvl == 1 {
-		// 				sklLvl = 0
-		// 				contr.Skills[role] = sklLvl
-		// 			}
-		// 		}
-
-		// 		if sklLvl == roleLvl {
-		// 			contr.Skills[role]++
-		// 			delete(roles, role)
-		// 			console.Print("Assigned " + role + " to " + contr.Name)
-		// 			break
-
-		// 		} else if sklLvl == roleLvl-1 {
-		// 			for _, mentor := range assignment.Contribs {
-		// 				mentSkl, mentSklFound := mentor.Skills[role]
-		// 				if mentSklFound {
-		// 					if mentSkl >= roleLvl {
-		// 						contr.Skills[role]++
-		// 					}
-		// 				}
-		// 			}
-		// 			delete(roles, role)
-		// 			console.Print("Assigned " + role + " to " + contr.Name + " MENTORED")
-		// 			break
-
-		// 		}
-
-		// 	}
-		// }
-
-		// if len(roles) > 0 {
-		// 	console.Log(sol)
-		// 	console.Log(roles)
-		// 	panic("Not all roles were assigned to a contributor in project " + assignment.Proj.Name)
-		// }
-
 		start := 0
 
 		for _, contr := range assignment.Contribs {
@@ -297,8 +276,6 @@ func (sol *Solution) Eval() int {
 
 		assignment.Proj.Start = start
 		assignment.Proj.End = end
-
-		// assignment.Proj.Score
 
 		score := 0
 
@@ -318,4 +295,29 @@ func (sol *Solution) Eval() int {
 	}
 
 	return FinalScore
+}
+
+func (sol *Solution) Clone() *Solution {
+	sol2 := &Solution{
+		TC: sol.TC,
+	}
+
+	sol2.Assignments = make([]*Assignment, len(sol.Assignments))
+
+	for i, assignment := range sol.Assignments {
+		assignment2 := &Assignment{
+			Proj: assignment.Proj,
+		}
+
+		assignment2.Contribs = make([]*Contrib, len(assignment.Contribs))
+
+		for j, contr := range assignment.Contribs {
+			assignment2.Contribs[j] = contr
+		}
+
+		sol2.Assignments[i] = assignment2
+	}
+
+	return sol2
+
 }
